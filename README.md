@@ -119,6 +119,17 @@ ip a
 
 At this point `eth0` had picked up a **DHCP address of `10.0.0.3/24`** from the NAT Network — working, but not the static address the lab required (`10.0.0.2/24`).
 
+```bash
+# Restart connection
+sudo nmcli connection down "Wired connection 1"
+sudo nmcli connection up "Wired connection 1"
+
+# Fix DAD timeout issue (if no internet)
+sudo nmcli connection modify "Wired connection 1" ipv4.dad-timeout 0
+sudo nmcli connection down "Wired connection 1"
+sudo nmcli connection up "Wired connection 1"
+```
+
 ![Terminal troubleshooting network connection with ifconfig and nmcli](Screenshot%202026-09-09%20at%204.20.09%20PM.jpg)
 
 I opened the **Wired connection 1** settings via the NetworkManager applet, switched **IPv4 Method** to **Manual**, and set:
@@ -140,6 +151,7 @@ I then confirmed full internet access with:
 
 ```bash
 ping google.com
+ping 8.8.8.8
 ```
 ![Successful ping to google.com confirming internet access](Screenshot%202026-09-09%20at%204.22.48%20PM.jpg)
 
