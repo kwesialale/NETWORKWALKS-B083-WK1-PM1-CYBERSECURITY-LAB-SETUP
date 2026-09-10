@@ -75,15 +75,13 @@ Future target machines (Windows 10/11, Server, Android, intentionally vulnerable
 
 # 🪜 Lab Setup Procedure
 
-## Step 1. Install 7-Zip
-
-Downloaded and installed 7-Zip on my host machine to handle extraction of the Kali Linux VirtualBox image, since it ships as a compressed archive.
-
-## Step 2. Install VirtualBox
+## Step 1. Install VirtualBox
 
 Downloaded and installed the latest recommended version of Oracle VirtualBox for macOS from the official VirtualBox site, and confirmed the VirtualBox Manager launched correctly with an empty machine list ready for import.
 
-## Step 3. Create the NAT Network
+## Step 2. Create the NAT Network
+
+![Static IP Configuration](Screenshot%202026-09-10%20at%209.45.57%20AM.png)
 
 Instead of using the default per-VM NAT adapter, I created a dedicated **NAT Network** so multiple VMs could share the same subnet and see each other.
 
@@ -95,11 +93,13 @@ Navigated to **VirtualBox → File → Tools → Network → NAT Networks**, cre
 
 This network sat alongside the default `NatNetwork` (`10.0.2.0/24`) that VirtualBox creates automatically, so I made sure my Kali VM was pointed at `NatNetwork1` specifically and not the default one.
 
-## Step 4. Import Kali Linux
+## Step 3. Import Kali Linux
 
 Downloaded the pre-built Kali Linux VirtualBox image (`kali-linux-2025.4-virtualbox-amd64`) from the official Kali site and imported it as an appliance into VirtualBox.
 
 While reviewing the VM settings, I noticed VirtualBox flagged **"Invalid settings detected"** on the base machine — the Base Memory was set close to my host's physical RAM ceiling (6089 MB on an 8GB host), and the VM had more virtual CPUs assigned than my host's 2 physical CPUs could comfortably support. I brought Base Memory down to a safer **2048 MB** and adjusted the CPU count to bring the VM back within recommended limits before continuing.
+
+![VirtualBox settings showing System configuration](Screenshot%202026-09-10%20at%209.54.51%20AM.png)
 
 Under **System → Network**, I set:
 - **Adapter 1 → Attached to:** NAT Network
@@ -107,11 +107,11 @@ Under **System → Network**, I set:
 - **Promiscuous Mode:** Allow All
 - **Virtual Cable Connected:** checked
 
-I also confirmed **clipboard sharing** and **drag-and-drop** were enabled between host and guest, and set up a **shared folder** pointing at my host's `/downloads` directory so files could move between the two easily.
-
-## Step 5. Configure the Kali Linux Network
+## Step 4. Configure the Kali Linux Network
 
 Booted the Kali VM and opened a terminal to check the network state:
+
+![Kali Linux desktop running in VirtualBox](Screenshot%202026-09-09%20at%204.04.57%20PM.jpg)
 
 ```bash
 ip a
@@ -119,7 +119,11 @@ ip a
 
 At this point `eth0` had picked up a **DHCP address of `10.0.0.3/24`** from the NAT Network — working, but not the static address the lab required (`10.0.0.2/24`).
 
+![Terminal troubleshooting network connection with ifconfig and nmcli](Screenshot%202026-09-09%20at%204.20.09%20PM.jpg)
+
 I opened the **Wired connection 1** settings via the NetworkManager applet, switched **IPv4 Method** to **Manual**, and set:
+
+![kali linux network configuration settings](Screenshot%202026-09-10%20at%209.48.46%20AM.png)
 
 - **Address:** `10.0.0.2`
 - **Netmask:** `24`
@@ -137,10 +141,11 @@ I then confirmed full internet access with:
 ```bash
 ping google.com
 ```
+![Successful ping to google.com confirming internet access](Screenshot%202026-09-09%20at%204.22.48%20PM.jpg)
 
 which returned successful replies with 0% packet loss, confirming Kali could route out through the NAT Network to the internet.
 
-## Step 6. Create a Clean VM Snapshot
+## Step 5. Create a Clean VM Snapshot
 
 Once the static IP was confirmed working and internet access verified, I took a **VirtualBox Snapshot** of the Kali VM in this known-good state (`Snapshot 1`). This gives me a clean restore point to fall back to before running any risky tools or exploits, without having to redo the network setup from scratch.
 
@@ -180,7 +185,7 @@ This confirmed Kali Linux was correctly addressed on the `10.0.0.0/24` NAT Netwo
 
 **Root cause:** Duplicate Address Detection (DAD) delays on the wired connection profile were interfering with how quickly the static IP was accepted after toggling the interface — disabling the DAD timeout and cycling the connection through `nmcli` resolved it.
 
-## Problem 2. VirtualBox VT-x / Virtualization Error
+## Problem 2.  VirtualBox "Invalid Settings Detected" — VM Over-Provisioned
 
 **Issue:** VirtualBox flagged **"Invalid settings detected"** on the Kali VM, warning that the assigned Base Memory (6089 MB) was over 70% of my host's total 8GB RAM, and that more virtual CPUs were assigned than my host's 2 physical CPUs — both of which risked degrading VM performance or preventing the VM from starting cleanly.
 
@@ -223,19 +228,18 @@ This lab is strictly for **authorized, personal learning purposes**. Every machi
 
 - [VirtualBox](https://virtualbox.org/wiki/Downloads) — hypervisor used to host the lab
 - [Kali Linux](https://kali.org/get-kali) — attacker VM image
-- [7-Zip](https://7-zip.org/download.html) — used to extract the Kali VM archive
 - [Networkwalks Academy](https://networkwalks.com) — course and lab task guidance
 
 ---
 
 # 👤 Author
 
+Alale Matthew
+Cybersecurity Professional B083
+https://www.linkedin.com/in/matthewalale/
+
 ## 📌 Project Information
 
-**Task:** WK1-PM1 — Cybersecurity Lab Setup
+**Task:** Cybersecurity Lab Setup
 **Program:** Cybersecurity Training, Networkwalks Academy
 **Environment:** VirtualBox on macOS (MacBook Pro, 2015, Intel Core i5, 8GB RAM)
-
----
-
-*Project completed as part of Cybersecurity Training at Networkwalks*
