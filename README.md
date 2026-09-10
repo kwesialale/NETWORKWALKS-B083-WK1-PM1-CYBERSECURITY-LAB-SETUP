@@ -81,7 +81,7 @@ Downloaded and installed the latest recommended version of Oracle VirtualBox for
 
 ## Step 2. Create the NAT Network
 
-![Static IP Configuration](Screenshot%202026-09-10%20at%209.45.57%20AM.png)
+![VirtualBox NAT Network settings showing NatNetwork1 with 10.0.0.0/24](Screenshot%202026-09-10%20at%209.45.57%20AM.png)
 
 Instead of using the default per-VM NAT adapter, I created a dedicated **NAT Network** so multiple VMs could share the same subnet and see each other.
 
@@ -119,16 +119,7 @@ ip a
 
 At this point `eth0` had picked up a **DHCP address of `10.0.0.3/24`** from the NAT Network — working, but not the static address the lab required (`10.0.0.2/24`).
 
-```bash
-# Restart connection
-sudo nmcli connection down "Wired connection 1"
-sudo nmcli connection up "Wired connection 1"
-
-# Fix DAD timeout issue (if no internet)
-sudo nmcli connection modify "Wired connection 1" ipv4.dad-timeout 0
-sudo nmcli connection down "Wired connection 1"
-sudo nmcli connection up "Wired connection 1"
-```
+![Kali showing DHCP address 10.0.0.3/24](Screenshot%202026-09-09%20at%204.11.02%20PM.jpg)
 
 ![Terminal troubleshooting network connection with ifconfig and nmcli](Screenshot%202026-09-09%20at%204.20.09%20PM.jpg)
 
